@@ -14,8 +14,7 @@ def start_ankh(device):
     model.to(device=device)
     return model, tokenizer
 
-def process_seqs(seqs: list, model, tokenizer) -> list:
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+def process_seqs(seqs: list, model, tokenizer, device=device) -> list:
     seqs = [" ".join(list(re.sub(r"[UZOB]", "X", sequence))) for sequence in seqs]
     ids = tokenizer.batch_encode_plus(seqs, add_special_tokens=True, padding="longest")
     input_ids = torch.tensor(ids['input_ids']).to(device)
@@ -80,8 +79,7 @@ def run_ankh(df: pd, prot_col: str, seq_id: str) -> pd:
     return tensor_df
     
 def run_ablang(df: pd, prot_col: str, seq_id: str, ablang_model: str) -> pd:
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print("Using device: {}".format(device))
+    device = 'cpu'
     model, tokenizer = start_ablang(ablang_model=ablang_model)
     tensor_df = batch_embed(df=df, prot_col=prot_col, seq_id=seq_id, batch_size=100, model=model, tokenizer=tokenizer)
     return tensor_df
