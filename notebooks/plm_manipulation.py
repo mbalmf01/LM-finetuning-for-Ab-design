@@ -3,6 +3,8 @@ import torch, pandas as pd, numpy as np
 import re
 import ankh, inspect
 
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
 def start_ablang(ablang_model: str):
     tokenizer = AutoTokenizer.from_pretrained(f'qilowoq/{ablang_model}')
     model = AutoModel.from_pretrained(f'qilowoq/{ablang_model}', trust_remote_code=True)

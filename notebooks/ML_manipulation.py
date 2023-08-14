@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 from tensorflow.keras.utils import to_categorical
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
@@ -56,6 +56,28 @@ def regression_nn(input_dim=768):
     model.add(Dense(1, activation='linear'))
     model.compile(optimizer='adam', loss='mean_squared_error', metrics=[tf.keras.metrics.MeanAbsoluteError()])
     return model
+
+def regression_model2(input_dim):
+  model = Sequential([
+    #First hidden layer
+    Dense(512, activation='relu', input_shape=(input_dim,)),
+    BatchNormalization(),
+    Dropout(0.5), #Dropout for regularization
+
+    #Second hidden layer
+    Dense(256, activation='relu'),
+    BatchNormalization(),
+    Dropout(0.5), #Dropout for regularization
+
+    #Third hidden layer
+    Dense(128, activation='relu'),
+    BatchNormalization(),
+    Dropout(0.5), # Dropout for regularization
+
+    #Output layer
+    Dense(1, activation='linear')])
+  model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
+  return model
     
 def regression_report(y_true, y_pred):
     r2 = r2_score(y_true, y_pred)
