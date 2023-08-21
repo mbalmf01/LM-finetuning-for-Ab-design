@@ -16,6 +16,22 @@ def start_ankh(device):
     model.to(device=device)
     return model, tokenizer
 
+def chunks(l, n):
+    '''
+    splits a list into evenly sized chunks
+    '''
+    return [l[i:i + n] for i in range(0, len(l), n)]
+
+def get_aa_embedding(sequence: str, model: str, tokenizer, max_length: int):
+    '''
+    Apply fun to a list of sequences using Ablang and generate per-residue embeddings
+    '''
+    sequence = ' '.join(sequence)
+    encoded_input = tokenizer(sequence, padding='max_length', return_tensors='pt')
+    model_output = model(**encoded_input)
+    lhs = model_output.last_hidden_state
+    return lhs.detach().numpy()
+
 def process_seqs(seqs: list, model, tokenizer, device=device) -> list:
     seqs = [" ".join(list(re.sub(r"[UZOB]", "X", sequence))) for sequence in seqs]
     ids = tokenizer.batch_encode_plus(seqs, add_special_tokens=True, padding="longest")

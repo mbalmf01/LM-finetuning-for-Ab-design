@@ -2,7 +2,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import confusion_matrix
 from scipy.optimize import linear_sum_assignment
 import inspect
-import numpy as np
+import numpy as np, pandas as pd
 
 def cluster_purity(y_true, y_pred):
     confomat = confusion_matrix(y_true, y_pred)
