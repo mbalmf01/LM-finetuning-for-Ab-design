@@ -4,7 +4,8 @@ def __main__():
     import pprint as pp
     
     # Get the current date
-    today = time.strftime("%Y%M%D")
+    date = time.strftime('%D')
+    today = date[-2:] + date[:2] + date[3:5]
     
     os.chdir('/content/all_paired/opig_data')
     files = os.listdir()
@@ -54,7 +55,7 @@ def __main__():
     df['seq_id'] = df.apply(lambda row: row['seq_id'] + '_1' if duplicated_mask[row.name] else row['seq_id'], axis=1)
     
     df = df[~df['ANARCI_status_heavy'].str.contains('Shorter')]
-    df = df[df['ANARCI_status_light'].str.contains('Shorter')]
+    df = df[~df['ANARCI_status_light'].str.contains('Shorter')]
     
     df.to_csv(f'/content/all_paired/{today}_human_paired_seqs.csv')
     
