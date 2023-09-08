@@ -1,5 +1,8 @@
+from typing_extensions import runtime
+
+
 def __main__():
-    import polars as pl, pandas as pd
+    import pandas as pd
     import gzip, os, json, time
     import pprint as pp
     
@@ -24,44 +27,40 @@ def __main__():
         if metadata['Species'] == 'human':
           with gzip.open(filey, 'rb') as fs:
             # #read in antibody data and keep id, dna, and protein sequences
-            df = pl.read_csv(fs, skip_rows=1)
+            df = pd.read_csv(fs, skiprows=1, low_memory=False)
             df = df[['sequence_id_heavy', 'ANARCI_status_heavy', 'sequence_heavy', 'sequence_alignment_aa_heavy', 'v_call_heavy', 'd_call_heavy', 'j_call_heavy', 'sequence_id_light', 'ANARCI_status_light', 'sequence_light', 'v_call_light', 'j_call_light', 'sequence_alignment_aa_light']]
             #add a column using the metadata key
-            Run = pl.Series([metadata['Run']]*df.shape[0]).alias('Run')
-            # Add the new column to the DataFrame
-            df = df.with_columns(Run)
+            Run = [metadata['Run']]*df.shape[0]
+            df['Run'] = Run
             #save the dataframe to a list
             l.append(df)
             
-    l = [i.with_columns(pl.col('Run').cast(pl.Utf8)) for i in l]
-    
-    df = pl.concat(l)
-    
-    df = df.with_columns(
-        pl.concat_str([
-            pl.col('sequence_id_heavy'),
-            pl.lit('_'),
-            pl.col('sequence_id_light'),
-            pl.lit('_'),
-            pl.col('Run')
-        ]).alias('seq_id')
-    )
-    
-    # #having to get rid of duplicated seq IDs by adding '_1' to every duplicated sequence
-    df = df.to_pandas()
+    df = pd.concat(l)
     df['Run'] = df['Run'].astype(str)
+
+    df['seq_id'] = (df['sequence_id_heavy'] 
+          + ['_']*df.shape[0] 
+          + df['sequence_id_light'] 
+          + ['_']*df.shape[0] 
+          + df['Run'])
+
+    #having to get rid of duplicated seq IDs by adding '_1' to every duplicated sequence
     duplicated_mask = df['seq_id'].duplicated()
+    suffix = duplicated_mask.astype(int).astype(str).replace('0', '')
+
+    #concatenate the original sequence IDs with the suffix series
+    df['seq_id'] = df['seq_id'] + suffix
     
     df['seq_id'] = df.apply(lambda row: row['seq_id'] + '_1' if duplicated_mask[row.name] else row['seq_id'], axis=1)
-    
+    total = df.shape[0]
+    print(f'Dataframe contains {total} antibodies before data cleaning')
     df = df[~df['ANARCI_status_heavy'].str.contains('Shorter')]
     df = df[~df['ANARCI_status_light'].str.contains('Shorter')]
+
+    print(f'{total - df.shape[0]} antibodies were removed due to truncations')
+    print(f'writing {df.shape[0]} antibodies to file...')
     
     df.to_csv(f'/content/all_paired/{today}_human_paired_seqs.csv')
-    
-    for filey in files:
-        if 'csv.gz' in filey:
-            os.remove(filey)
     
 if __name__ == "__main__":
   __main__()
