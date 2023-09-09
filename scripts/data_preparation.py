@@ -1,3 +1,20 @@
+import os
+
+def opig_all_paired():
+    os.system("wget -P /content/all_paired/opig_data -i /content/msc-project-source-code-files-22-23-mbalmf01/data_files/wget_commands.txt")
+
+def clean_human_abs():
+    os.system("python /content/msc-project-source-code-files-22-23-mbalmf01/scripts/data_preparation.py")
+
+def install_miniconda():
+    os.system("wget -P /content/all_paired/opig_data -i /content/msc-project-source-code-files-22-23-mbalmf01/scripts/wget_commands.txt")
+    os.system("wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.3.1-0-Linux-x86_64.sh")
+    os.system("chmod +x Miniconda3-py39_23.3.1-0-Linux-x86_64.sh")
+    os.system("echo 'y' | bash ./Miniconda3-py39_23.3.1-0-Linux-x86_64.sh -b -f -p /usr/local")
+
+def install_mmseqs2():
+    os.system("conda install -c conda-forge -c bioconda mmseqs2")
+
 def __main__():
     import pandas as pd
     import gzip, os, json, time
