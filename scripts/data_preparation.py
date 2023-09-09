@@ -1,11 +1,9 @@
-from typing_extensions import runtime
-
-
 def __main__():
     import pandas as pd
     import gzip, os, json, time
     import pprint as pp
     
+    print('Running...')
     # Get the current date
     date = time.strftime('%D')
     today = date[-2:] + date[:2] + date[3:5]
@@ -50,8 +48,6 @@ def __main__():
 
     #concatenate the original sequence IDs with the suffix series
     df['seq_id'] = df['seq_id'] + suffix
-    
-    df['seq_id'] = df.apply(lambda row: row['seq_id'] + '_1' if duplicated_mask[row.name] else row['seq_id'], axis=1)
     total = df.shape[0]
     print(f'Dataframe contains {total} antibodies before data cleaning')
     df = df[~df['ANARCI_status_heavy'].str.contains('Shorter')]
