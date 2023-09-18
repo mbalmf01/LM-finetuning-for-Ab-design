@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 def opig_all_paired():
     os.system("wget -P /content/all_paired/opig_data -i /content/msc-project-source-code-files-22-23-mbalmf01/data_files/wget_commands.txt")
